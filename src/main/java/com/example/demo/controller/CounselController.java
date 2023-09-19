@@ -18,16 +18,13 @@ public class CounselController {
   @GetMapping(value = "/counsels/new")
   public String createForm(Model model) {
     model.addAttribute("counselForm", new CounselForm());
-    return "hh";
+    return "redirect:/index.html";
   }
 
 
   @PostMapping(value = "/counsels/new")
   public String create(@Valid CounselForm form, BindingResult result) {
     counselService.saveCounsel(form);
-    if (result.hasErrors()) {
-      return "hh";
-    }
     return "redirect:/index.html";
   }
 }
