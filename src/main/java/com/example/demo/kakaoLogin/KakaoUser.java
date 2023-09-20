@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+//하하
 @Component
 public class KakaoUser {
     private final String loginUri = "https://kapi.kakao.com/v2/user/me";
