@@ -35,7 +35,7 @@ public class KakaoLoginController {
 
         HttpSession session = request.getSession();
         session.setAttribute(SessionConst.LOGIN_MEMBER, member);
-        return "redirect:/";
+        return "redirect:/index.html";
     }
 
     @GetMapping("/")
