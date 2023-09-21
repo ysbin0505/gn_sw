@@ -198,6 +198,10 @@
 
 
 <div id="tab-container">
+    <ul id="tab-nav">
+    </ul>
+    <div id="tab-content">
+    </div>
 </div>
 
 <button onclick="test()">최종 저장 목록</button>
@@ -209,7 +213,7 @@
         <div class="option">
             <div>
                 <form onsubmit="searchPlaces(); return false;">
-                    키워드 : <input type="text" value="이태원 맛집" id="keyword" size="15">
+                    키워드 : <input type="text" value="창원대학교" id="keyword" size="15">
                     <button type="submit">검색하기</button>
                 </form>
             </div>
@@ -319,7 +323,6 @@
             btn.innerText = '+';
             btn.addEventListener('click', () => {
                 addPlace(places[i]);
-                //console.log(selectPlaces);
             })
             itemEl.appendChild(btn);
 
@@ -459,48 +462,63 @@
     }
 
     function addPlace(addPlace) {
+        const tabContentItem = document.querySelectorAll('.tab-content-item')[curNav];
+        const ul = tabContentItem.querySelector('ul');
 
-        selectPlaces.push(addPlace);
-
-        let sl = document.getElementById('selectList');
         let li = document.createElement('li');
         li.innerText = addPlace.place_name;
         let btn = document.createElement('button');
-        btn.innerText = "삭제";
-        li.appendChild(btn);
-        sl.appendChild(li);
         btn.addEventListener('click', () => {
             deleteButtonAndPatch();
         })
+        btn.innerText = "삭제";
+
+        li.appendChild(btn);
+        ul.appendChild(li);
+        selectPlaces.push(addPlace);
+
     }
 
     function deleteButtonAndPatch() {
-        const boxs = document.querySelectorAll("#selectList > li");
-        boxs.forEach((el, index) => {
+        const tabContentItem = document.querySelectorAll('.tab-content-item')[curNav];
+        const li = tabContentItem.querySelector('ul').querySelectorAll('li');
+        li.forEach((el, index) => {
             el.onclick = () => {
                 el.remove();
                 selectPlaces.splice(index, 1);
-                //console.log(index,"번째를 삭제했습니다.");
-                //console.log(selectPlaces);
             }
         });
     }
 
+    let curNav = 0;
+
     const startDate = new Date([[${startDate}]]);
     const endDate = new Date([[${endDate}]]);
     const tabContainer = document.getElementById('tab-container'); // 탭이 들어갈 컨테이너 요소
-
-    for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
+    const tabContent = document.getElementById('tab-content');
+    const tabNav = document.getElementById('tab-nav');
+    for (let date = startDate, i=0; date <= endDate; date.setDate(date.getDate() + 1), i++) {
         const formattedDate = date.toISOString().split('T')[0];
-        const tab = document.createElement('div');
-        tab.classList.add('tab'); // 탭의 CSS 클래스를 추가
+        const tabNavItem = document.createElement('li');
+        tabNavItem.innerText = formattedDate;
+        tabNavItem.addEventListener('click', function() {
+            curNav=i;
+            showTab(i);
+        });
+        tabNav.appendChild(tabNavItem);
 
-        const tabLabel = document.createElement('span');
-        tabLabel.textContent = formattedDate;
-        tab.appendChild(tabLabel);
-        tabContainer.appendChild(tab);
+        const tabContentDiv = document.createElement('div');
+        tabContentDiv.classList.add('tab-content-item');
+        const tabContentItem = document.createElement('ul');
+        tabContentDiv.appendChild(tabContentItem);
+        tabContent.appendChild(tabContentDiv);
     }
 
+    function showTab(index) {
+        const tabContents = document.querySelectorAll('.tab-content-item');
+        tabContents.forEach(content => content.style.display = 'none');
+        tabContents[index].style.display = 'block';
+    }
 
 </script>
 
