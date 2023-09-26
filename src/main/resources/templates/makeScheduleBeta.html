@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         .map_wrap, .map_wrap * {
             margin: 0;
@@ -204,7 +205,7 @@
     </div>
 </div>
 
-<button onclick="test()">최종 저장 목록</button>
+<button onclick="save()">최종 저장</button>
 
 
 <div class="map_wrap">
@@ -233,11 +234,24 @@
 <script th:inline="javascript">
 
 
-    function test() {
-        console.log(selectPlaces);
+    function save() {
+        console.log(JSON.stringify(selectPlaces));
+        $.ajax({
+            type: "POST",
+            url: "/schedule",
+            data: JSON.stringify(selectPlaces),
+            contentType: "application/json",
+            success: function (data) {
+                console.log("전송 완료");
+            },
+            error: function () {
+                console.log("전송 실패");
+            }
+        })
     }
 
     let selectPlaces = []; // 선택된 여행지
+    let sequence=0;
 
     // 마커를 담을 배열입니다
     var markers = [];
@@ -461,33 +475,41 @@
         }
     }
 
-    function addPlace(addPlace) {
+    function addPlace(place) {
         const tabContentItem = document.querySelectorAll('.tab-content-item')[curNav];
         const ul = tabContentItem.querySelector('ul');
 
         let li = document.createElement('li');
-        li.innerText = addPlace.place_name;
+        li.innerText = place.place_name;
         let btn = document.createElement('button');
+
+        let idx = ++sequence;
         btn.addEventListener('click', () => {
-            deleteButtonAndPatch();
+            deleteButtonAndPatch(idx);
+            li.remove();
         })
         btn.innerText = "삭제";
 
-        li.appendChild(btn);
-        ul.appendChild(li);
-        selectPlaces.push(addPlace);
+        let setTime = document.createElement('input');
+        setTime.setAttribute("type", "time");
 
+        console.log(place);
+        li.appendChild(btn);
+        li.appendChild(setTime);
+        ul.appendChild(li);
+        const newDate = new Date(startDate);
+        newDate.setDate(startDate.getDate()+curNav); // getDate(): 일자 반환, curNav더해서 넘어가는 일자는 이전 달의 최대 일을 빼서 다음 달로 넘어감
+        selectPlaces.push({name:place.place_name, address:place.address_name, phone:place.phone, place_id:place.id, date: newDate, idx:idx});
     }
 
-    function deleteButtonAndPatch() {
-        const tabContentItem = document.querySelectorAll('.tab-content-item')[curNav];
-        const li = tabContentItem.querySelector('ul').querySelectorAll('li');
-        li.forEach((el, index) => {
-            el.onclick = () => {
-                el.remove();
+    function deleteButtonAndPatch(idx) {
+        console.log(idx);
+        selectPlaces.forEach((place, index) => {
+            if(place.idx==idx) {
+                console.log("삭제할 idx:"+idx+" 발견 index:"+index);
                 selectPlaces.splice(index, 1);
             }
-        });
+        })
     }
 
     let curNav = 0;
@@ -497,7 +519,8 @@
     const tabContainer = document.getElementById('tab-container'); // 탭이 들어갈 컨테이너 요소
     const tabContent = document.getElementById('tab-content');
     const tabNav = document.getElementById('tab-nav');
-    for (let date = startDate, i=0; date <= endDate; date.setDate(date.getDate() + 1), i++) {
+
+    for (let date = new Date(startDate), i=0; date <= endDate; date.setDate(date.getDate() + 1), i++) {
         const formattedDate = date.toISOString().split('T')[0];
         const tabNavItem = document.createElement('li');
         tabNavItem.innerText = formattedDate;
@@ -505,6 +528,7 @@
             curNav=i;
             showTab(i);
         });
+
         tabNav.appendChild(tabNavItem);
 
         const tabContentDiv = document.createElement('div');
